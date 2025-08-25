@@ -1,0 +1,31 @@
+name: Production - Promote Staging on PR Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  promote-to-production:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout da branch main
+        uses: actions/checkout@v3
+
+      - name: Promover Staging para Produção
+        run: |
+          echo "Copiando staging/index.html para index.html"
+          cp staging/index.html index.html
+
+      - name: Fazer commit e push para gh-pages
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -B gh-pages
+          git add index.html
+          git commit -m "chore(prod): promove staging para produção"
+          echo "Commit enviado ao gh-pages"
+          git push -f origin gh-pages
